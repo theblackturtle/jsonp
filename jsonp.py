@@ -8,6 +8,12 @@ from urlparse import urlparse
 import sys
 import os
 
+PAYLOADS = [
+    "?callback=x&cb=x&jsonp=x&jsonpcallback=x&jsonpcb=x&jsonp_cb=x&json=x&jsoncallback=x&jcb=x&call=x&cb_=x&_cb_=x",
+    ".jsonp?callback=x&cb=x&jsonp=x&jsonpcallback=x&jsonpcb=x&jsonp_cb=x&json=x&jsoncallback=x&jcb=x&call=x&cb_=x&_cb_=x"
+]
+
+
 class BurpExtender(IBurpExtender, IScannerCheck):
 
     def registerExtenderCallbacks(self, callbacks):
@@ -25,13 +31,6 @@ class BurpExtender(IBurpExtender, IScannerCheck):
 
         sys.stdout = callbacks.getStdout()
         sys.stderr = callbacks.getStderr()
-
-    def load_payloads(self):  
-        lines = []
-        with open('payloads.txt') as f:
-            lines = f.read().splitlines()
-
-        return lines
 
     '''
     https://stackoverflow.com/questions/3675318/how-to-replace-the-some-characters-from-the-end-of-a-string
@@ -95,9 +94,7 @@ class BurpExtender(IBurpExtender, IScannerCheck):
 
         res_type = self._helpers.analyzeResponse(response).getStatedMimeType()
         if res_type == "JSON":
-            payloads = self.load_payloads()
-
-            for i in payloads:
+            for i in PAYLOADS:
                 request_url = self._helpers.analyzeRequest(baseRequestResponse).getUrl()
                 payload_url = urlparse(self.construct_url(str(request_url), i))
                 
